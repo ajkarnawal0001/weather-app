@@ -1,63 +1,111 @@
+import Bulk from "./../../db.json";
 import React, { useState } from 'react'
 import { UilSearchAlt , UilMapMarkerInfo} from '@iconscout/react-unicons'
-import { toast } from "react-toastify";
-export const SearchBar = ({ setQuery, units, handleSearch, setUpdateChange,update }) => {
-  const [city, setCity] = useState("");
-
-  let [timer, setTimer] = useState(undefined);
-
-  // debouncing for search bar using callback handleSearch function
-  const handleChange = (e) => {
-    const { value } = e.target;
-    setCity(value)
-    if (timer) {
-      clearTimeout(timer);
-    }
-    setTimer(
-      setTimeout(() => {
-        handleSearch(value);
-      }, 500)
-    );
-  };
-  
+import "./searchBar.css"
+export const SearchBar = ({ setQuery,query,weather, setUpdateChange,update }) => {
+const[display,setDisplay]=useState([]);
+const [inputStyle, setInputStyle] = useState(false);
+const [displayMode, setDisplayMode] = useState(true);
   const handleSearchClick = () => {
-    if (city !== "") {
-      setQuery({ q: city });
-      console.log(city)
-      setUpdateChange(!update)
-    }
+    if (!query) setQuery({ q: query })
+    setDisplayMode(false)
+  }
+  
+  const inPutBox = () => {
+    setInputStyle((current) => !current);
+    
+      !query ? filterBulkData("") : filterBulkData(query);
+    
+    setDisplayMode(true);
   };
-
+  const filterBulkData = (text) => {
+    let matches = Bulk.filter((x) => {
+      const regex = new RegExp(`${text}`, "gi");
+      return x.city.match(regex) || x.state.match(regex);
+    });
+    setDisplay(matches);
+  };
+  const handleChange = (e) => {
+    filterBulkData(e.target.value);
+    setQuery({q:e.target.value});
+    setDisplayMode(true);
+  };
+  const setSearch = (city) => {
+    const edit = Bulk.filter((item) => {
+      return item.city === city;
+    });
+    setQuery({q:edit[0].city});
+    setDisplayMode((current) => !current);
+    setUpdateChange(!update)
+  };
   const handleLocationClick = () => {
     if (navigator.geolocation) {
-      toast.info("Fetching users location.");
-      navigator.geolocation.getCurrentPosition((position) => {
-        toast.success("Location fetched!");
+      navigator.geolocation.getCurrentPosition(position => {
         let lat = position.coords.latitude;
         let lon = position.coords.longitude;
-
         setQuery({
-          lat,
-          lon,
-        });
-        setUpdateChange(!update)
-      });
+          lat, lon
+        })
+      })
+      setUpdateChange(!update)
     }
-  };
+  }
   return (
-    <div className="flex flex-row justify-center my-6">
-      <div className="flex flex-row w-3/4 items-center justify-center space-x-4">
-        <input type="text" className="text-xl font-light p-2 w-full shadow-xl focus:outline-none capitalize placeholder:lowercase rounded-lg"
-        placeholder='sreach for city...'
-        // value={city}
-        onChange={handleChange}
-        />
-        <UilSearchAlt size={25} className='text-black cursor-pointer transition ease-out hover:scale-125'
-        onClick={handleSearchClick}
-        />
-        <UilMapMarkerInfo className='text-black cursor-pointer transition ease-out hover:scale-125'
-         onClick={handleLocationClick}/>
+    <>
+ <form onSubmit={(e)=>e.preventDefault()}>
+      <div className="container" >
+       
+        <div>
+          <UilMapMarkerInfo
+            onClick={handleLocationClick}
+            size={25}
+          />
+        </div>
+        <div className="inputdiv">
+          <input
+            onClick={inPutBox}
+            type="text"
+            value={query.q}
+            onChange={handleChange}
+            placeholder="search your city"
+            className="input"
+
+          />
+        </div>
+        <div>
+          <UilSearchAlt
+             onClick={handleSearchClick}
+            size={25}
+            className="search"
+          />
+
+        </div>
+        </div>
+        </form>
+
+      <div className="bulk-data-container">
+        {displayMode &&
+          display.map((e, i) => (
+            <div
+              key={i}
+              className="bulk-data"
+              onClick={() => setSearch(e.city)}
+            >
+              <div className="bulk-data-info">
+                <strong>{e.city},</strong>
+                <p>{e.state}</p>
+              </div>
+              <div className="bulk-data-icon">
+                
+              </div>
+            </div>
+          ))}
       </div>
-    </div>
+      
+
+    </>
   )
 }
+
+
+

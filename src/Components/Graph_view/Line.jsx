@@ -52,8 +52,9 @@ export const Line = ({ query, setQuery }) => {
             units={units}
             setUnits={setUnits}
             update={update}
+            query={query}
+            weather={weather}
             setUpdateChange={setUpdateChange}
-            handleSearch={handleSearch}
           />
           <GraphData hourlyData={weather.hourly} weather={weather} />
           <Forecast title="daily forecast" items={weather.daily} />

@@ -15,6 +15,7 @@ const getWeatherData = (infoType, searchParams) => {
   return fetch(url).then((res) => res.json());
 };
 
+
 const formatCurrentWeather = (data) => {
   const {
     coord: { lat, lon },
