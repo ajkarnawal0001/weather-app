@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import getFormattedWeatherData from '../../Utiliies/Utility';
+import Sun from '../DustTillDown/Sun';
 import Forecast from '../Forecast/Forecast';
 import { SearchBar } from '../Search_bar/SearchBar';
 import { GraphData } from './GraphData';
@@ -56,8 +57,9 @@ export const Line = ({ query, setQuery }) => {
             weather={weather}
             setUpdateChange={setUpdateChange}
           />
-          <GraphData hourlyData={weather.hourly} weather={weather} />
           <Forecast title="daily forecast" items={weather.daily} />
+          <GraphData hourlyData={weather.hourly} weather={weather} />
+          <Sun weather={weather}/>
         </div>
       )}
     </>
